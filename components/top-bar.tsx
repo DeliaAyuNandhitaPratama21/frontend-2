@@ -2,12 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
+import { usePathname, useRouter } from "next/navigation"
 import { ChevronDown, LogOut, User } from "lucide-react"
 
 export default function TopBar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
 
   const navItems = [
@@ -15,6 +15,13 @@ export default function TopBar() {
     { label: "Unggah Struk", href: "/upload" },
     { label: "Riwayat", href: "/history" },
   ]
+
+  // ✅ LOGOUT CUSTOM (SESUAI BACKEND KAMU)
+  const handleLogout = () => {
+    localStorage.removeItem("access_token")
+    localStorage.removeItem("user_id")
+    router.push("/login")
+  }
 
   return (
     <header className="w-full bg-white border-b">
@@ -27,9 +34,9 @@ export default function TopBar() {
           </span>
         </Link>
 
-        {/* MENU + AVATAR (KANAN, RAPAT & RAPI) */}
+        {/* MENU KANAN */}
         <div className="ml-auto flex items-center gap-8">
-          {/* NAV MENU */}
+          {/* NAV */}
           <nav className="flex items-center gap-6">
             {navItems.map((item) => (
               <Link
@@ -46,11 +53,11 @@ export default function TopBar() {
             ))}
           </nav>
 
-          {/* AVATAR DROPDOWN */}
+          {/* AVATAR */}
           <div className="relative">
             <button
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 focus:outline-none"
+              className="flex items-center gap-2"
             >
               <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold">
                 D
@@ -72,12 +79,7 @@ export default function TopBar() {
                 </Link>
 
                 <button
-                  onClick={() =>
-                    signOut({
-                      redirect: true,
-                      callbackUrl: "/login",
-                    })
-                  }
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-b-xl"
                 >
                   <LogOut className="w-4 h-4" />

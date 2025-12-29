@@ -6,7 +6,7 @@ import ClientProviders from "@/components/clientproviders"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "StyDcode",
+  title: "Carbonscan",
   description: "Monitor emisi karbon Anda",
 }
 

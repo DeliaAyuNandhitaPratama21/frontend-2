@@ -9,12 +9,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 
+const API_BASE =
+  "https://backend-3nv522jrt-deliaayunandhitapratama21s-projects.vercel.app"
+
 export default function RegisterPage() {
   const router = useRouter()
 
-  const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [agree, setAgree] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -23,22 +26,27 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: email,
-          password: password,
-        }),
-      })
+      const res = await fetch(
+        `${API_BASE}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      )
 
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.detail || "Register gagal")
+        throw new Error(data.error || "Register gagal")
       }
 
-      alert(data.msg) // ✅ "User terdaftar"
+      alert("Register berhasil, silakan login")
       router.push("/login")
     } catch (err: any) {
       alert(err.message || "Terjadi kesalahan")
@@ -86,7 +94,11 @@ export default function RegisterPage() {
             Setuju syarat & ketentuan
           </label>
 
-          <Button type="submit" disabled={!agree || isLoading} className="w-full">
+          <Button
+            type="submit"
+            disabled={!agree || isLoading}
+            className="w-full"
+          >
             {isLoading ? "Memproses..." : "Daftar"}
           </Button>
         </form>

@@ -1,6 +1,9 @@
 "use client"
 
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+
 import {
   LineChart,
   Line,
@@ -21,45 +24,45 @@ import Card from "@/components/card"
 const COLORS = ["#EF4444", "#F59E0B", "#22C55E"]
 
 export default function DashboardPage() {
-  const [userId, setUserId] = useState<string | null>(null)
+  const { status } = useSession()
+  const router = useRouter()
+
   const [totalEmisi, setTotalEmisi] = useState(0)
   const [monthlyEmissionData, setMonthlyEmissionData] = useState<any[]>([])
   const [categoryEmissionData, setCategoryEmissionData] = useState<any[]>([])
 
-  // ✅ AMBIL USER DARI LOGIN
+  // 🔐 PROTEKSI HALAMAN
   useEffect(() => {
-    const id = localStorage.getItem("user_id")
-    if (!id) {
-      window.location.href = "/login"
-      return
+    if (status === "unauthenticated") {
+      router.replace("/login")
     }
-    setUserId(id)
-  }, [])
+  }, [status, router])
 
-  // ✅ FETCH DATA SESUAI USER
+  // 📊 FETCH DATA (NANTI SAMBUNG BACKEND)
   useEffect(() => {
-    if (!userId) return
+    if (status !== "authenticated") return
 
-    fetch(`http://127.0.0.1:8000/dashboard/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTotalEmisi(data.total_bulan_ini)
+    // sementara dummy biar UI muncul
+    setTotalEmisi(1234)
+    setMonthlyEmissionData([
+      { month: "Jan", emisi: 120 },
+      { month: "Feb", emisi: 200 },
+      { month: "Mar", emisi: 150 },
+    ])
+    setCategoryEmissionData([
+      { name: "Makanan", value: 400 },
+      { name: "Transport", value: 300 },
+      { name: "Listrik", value: 200 },
+    ])
+  }, [status])
 
-        setMonthlyEmissionData(
-          data.monthly.map((m: any) => ({
-            month: new Date(2025, m.month - 1).toLocaleString("en-US", {
-              month: "short",
-            }),
-            emisi: m.emisi,
-          }))
-        )
+  if (status === "loading") {
+    return <div className="p-6">Loading...</div>
+  }
 
-        setCategoryEmissionData(data.category)
-      })
-      .catch(() => {
-        alert("Gagal mengambil data dashboard")
-      })
-  }, [userId])
+  if (status === "unauthenticated") {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -83,7 +86,12 @@ export default function DashboardPage() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="emisi" stroke="#1A6B41" strokeWidth={3} />
+                <Line
+                  type="monotone"
+                  dataKey="emisi"
+                  stroke="#1A6B41"
+                  strokeWidth={3}
+                />
               </LineChart>
             </ResponsiveContainer>
           </Card>
